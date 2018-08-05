@@ -1,9 +1,9 @@
 package com.denisgl;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,21 +11,23 @@ public class WikiHandler extends RecursiveAction {
 
     private static final Properties SETTINGS = Startup.getSettings();
     private static final int MAX_PAGES = 400;
+    private static final int MAX_LEVEL = 2;
 
-    private static List<CategoryMember> cmToProcess = new ArrayList<>();
-    private static AtomicInteger allowedSubCatLevel = new AtomicInteger(0);
+    private static Queue<CategoryMember> cmToProcess = new ConcurrentLinkedQueue<>();
+    private static AtomicInteger allowedSubCatLevel = new AtomicInteger(-1);
 
     private CategoryMember cm;
 
     public WikiHandler(CategoryMember cm) {
         this.cm = cm;
         if (cm.getParent() == null) {
-            allowedSubCatLevel.set(0);
+            allowedSubCatLevel.set(-1);
         }
     }
 
     @Override
     protected void compute() {
+        int cmChildLevel = cm.getLevel() + 1;
         for (CategoryMember categoryMember : cm.getChildren()) {
             WikiReader.fillPageText(categoryMember);
             WikiWriter.writeInCVS(categoryMember);
@@ -33,16 +35,18 @@ public class WikiHandler extends RecursiveAction {
             if (categoryMember.getLevel() <= allowedSubCatLevel.get()) {
                 process(categoryMember);
             } else {
-                cmToProcess.add(categoryMember);
+                if (cmChildLevel < MAX_LEVEL) {
+                    cmToProcess.add(categoryMember);
+                }
             }
         }
 
         CategoryMember lastOnLevel = cm.getLastOnLevel();
         boolean isFilled = lastOnLevel != null && lastOnLevel.isFilled();
-        if (isFilled && cm.getCountPages().get() > MAX_PAGES) {
+        if (isFilled && (cm.getCountPages().get() > MAX_PAGES || cmChildLevel >= MAX_LEVEL)) {
             cmToProcess.clear();
         } else if (isFilled) {
-            allowedSubCatLevel.set(cm.getLevel() + 1);
+            allowedSubCatLevel.incrementAndGet();
             Iterator<CategoryMember> iterator = cmToProcess.iterator();
             while (iterator.hasNext()) {
                 CategoryMember next = iterator.next();
@@ -50,6 +54,7 @@ public class WikiHandler extends RecursiveAction {
                 process(next);
             }
         }
+
     }
 
     private WikiHandler process(CategoryMember categoryMember) {
