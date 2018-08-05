@@ -51,6 +51,9 @@ public class Startup {
         int threads = Integer.parseInt(SETTINGS.getProperty("threads"));
         ForkJoinPool forkJoinPool = new ForkJoinPool(threads);
         wikiHandlers.forEach(forkJoinPool::invoke);
+
+        forkJoinPool.shutdown();
+        WikiWriter.closeCvsWriter();
     }
 
     public static Properties getSettings() {

@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,24 +24,15 @@ public class WikiReader {
     private static final String WIKI_URL = "https://ru.wikipedia.org/w/api.php?action=query&format=xml&list=categorymembers&cmprop=title|type|ids&cmlimit=500&cmtitle=Category:";
     private static final String WIKI_PAGE_URL = "https://ru.wikipedia.org/w/api.php?format=xml&action=query&prop=extracts&explaintext&exsectionformat=plain&pageids=";
 
-    private static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    private static DocumentBuilder db;
-
-    static {
-        try {
-            db = dbf.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void fillCmWithChildren(CategoryMember cm) {
         if (cm.getType() == page) return;
 
         Document doc = null;
         try {
-            doc = db.parse(new URL(WIKI_URL + cm.getTitle()).openStream());
-        } catch (SAXException | IOException e) {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.parse(new URL(WIKI_URL + URLEncoder.encode(cm.getTitle(), "UTF-8")).openStream());
+        } catch (Exception e) {
             e.printStackTrace();
             return;
         }
@@ -81,15 +73,18 @@ public class WikiReader {
     }
 
     public static void fillPageText(CategoryMember cm) {
-        if (cm.getType() == page) {
-            try {
-                Document docPage = db.parse(new URL(WIKI_PAGE_URL + cm.getPageId()).openStream());
-                NodeList textSingleList = docPage.getElementsByTagName("extract");
-                String textContent = textSingleList.item(0).getTextContent();
-                cm.setText(textContent);
-            } catch (IOException | SAXException e) {
-                e.printStackTrace();
-            }
+        if (cm.getType() != page) return;
+
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document docPage = db.parse(new URL(WIKI_PAGE_URL + cm.getPageId()).openStream());
+
+            NodeList textSingleList = docPage.getElementsByTagName("extract");
+            String textContent = textSingleList.item(0).getTextContent();
+            cm.setText(textContent);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

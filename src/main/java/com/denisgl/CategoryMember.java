@@ -1,5 +1,6 @@
 package com.denisgl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,6 +18,8 @@ public class CategoryMember {
 
     private CategoryMember parent;
     private List<CategoryMember> children;
+
+    private boolean isFilled;
 
     private AtomicInteger countPages;
 
@@ -59,6 +62,11 @@ public class CategoryMember {
 
     public void setText(String text) {
         this.text = text;
+        isFilled = true;
+    }
+
+    public boolean isFilled() {
+        return isFilled;
     }
 
     public CategoryMember getParent() {
@@ -70,6 +78,9 @@ public class CategoryMember {
     }
 
     public List<CategoryMember> getChildren() {
+        if (getType() == Startup.CmType.page) {
+            return Collections.emptyList();
+        }
         return children;
     }
 
@@ -81,6 +92,7 @@ public class CategoryMember {
                 .count();
 
         getCountPages().addAndGet(Math.toIntExact(childrenPages));
+        isFilled = true;
     }
 
     public AtomicInteger getCountPages() {
@@ -111,11 +123,37 @@ public class CategoryMember {
         return parent.getFileId(separator) + separator + getNumber();
     }
 
+    public String getDestination() {
+        if (parent == null) {
+            return getNumber() + "_" + getTitle();
+        }
+
+        if (getType() != Startup.CmType.page) {
+            return parent.getDestination() + "/" + getNumber() + "_" + getTitle();
+        }
+        return parent.getDestination() + "/" + getFileId("_") + ".txt" ;
+    }
+
     public int getLevel() {
         if (parent == null) {
             return -1;
         }
         return 1 + parent.getLevel();
+    }
+
+    public CategoryMember getLastOnLevel() {
+        CategoryMember last = getRoot();
+        int i = getLevel();
+        while (i >= 0) {
+            List<CategoryMember> children = last.getChildren();
+
+            if (children == null) return null;
+
+            last = children.get(children.size() - 1);
+            i--;
+        }
+
+        return last;
     }
 
 }
