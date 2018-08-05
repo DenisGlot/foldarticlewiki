@@ -147,7 +147,7 @@ public class CategoryMember {
         while (i >= 0) {
             List<CategoryMember> children = last.getChildren();
 
-            if (children == null) return null;
+            if (children == null || children.isEmpty()) return null;
 
             last = children.get(children.size() - 1);
             i--;
