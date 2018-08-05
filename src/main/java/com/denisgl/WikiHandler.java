@@ -1,6 +1,7 @@
 package com.denisgl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.RecursiveAction;
@@ -11,11 +12,10 @@ public class WikiHandler extends RecursiveAction {
     private static final Properties SETTINGS = Startup.getSettings();
     private static final int MAX_PAGES = 400;
 
+    private static List<CategoryMember> cmToProcess = new ArrayList<>();
+    private static AtomicInteger allowedSubCatLevel = new AtomicInteger(0);
 
     private CategoryMember cm;
-    private static List<CategoryMember> cmToProcess = new ArrayList<>();
-
-    private static AtomicInteger allowedSubCatLevel = new AtomicInteger(0);
 
     public WikiHandler(CategoryMember cm) {
         this.cm = cm;
@@ -43,11 +43,13 @@ public class WikiHandler extends RecursiveAction {
             cmToProcess.clear();
         } else if (isFilled) {
             allowedSubCatLevel.set(cm.getLevel() + 1);
-            cmToProcess.removeIf(cm -> process(cm) != null);
-            cmToProcess.clear();
+            Iterator<CategoryMember> iterator = cmToProcess.iterator();
+            while (iterator.hasNext()) {
+                CategoryMember next = iterator.next();
+                iterator.remove();
+                process(next);
+            }
         }
-
-
     }
 
     private WikiHandler process(CategoryMember categoryMember) {
