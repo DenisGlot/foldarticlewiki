@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>This is easy!</comment>
+    <entry key="categories">Бизнес,Наука</entry>
+    <entry key="threads">2</entry>
+    <entry key="delay.requests.seconds">2</entry>
+    <entry key="path">/home/dennis/Documents/texts/</entry>
+    <entry key="cvs.name">result</entry>
+</properties>
