@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * pageId equals 0 if type equals CmType.cat
  * text doesn't equals null if type equals CmType.page
  */
-public class CategoryMember {
+public class CategoryMember implements Comparable<CategoryMember> {
 
     private int pageId;// 0 if type equals CmType.cat
     private String number;
@@ -156,4 +156,8 @@ public class CategoryMember {
         return last;
     }
 
+    @Override
+    public int compareTo(CategoryMember o) {
+        return getTitle().compareTo(o.getTitle());
+    }
 }

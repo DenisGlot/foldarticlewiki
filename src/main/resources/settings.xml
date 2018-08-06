@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <entry key="categories">Путешествия,Искусство,Автомобили,Бизнес,Религия,Политика,Наука,Домашние животные,Спорт,Технология</entry>
+    <entry key="categories">Путешествия,Бизнес,Наука,Религия,Политика,Домашние животные,Спорт,Технология,Автомобили,Искусство</entry>
     <entry key="threads">4</entry>
     <entry key="delay.requests.seconds">0</entry>
     <entry key="path">/home/dennis/Documents/texts/</entry>

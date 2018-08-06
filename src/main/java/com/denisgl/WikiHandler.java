@@ -32,12 +32,10 @@ public class WikiHandler extends RecursiveAction {
             WikiReader.fillPageText(categoryMember);
             WikiWriter.writeInCVS(categoryMember);
             WikiWriter.createFolderOrFile(categoryMember);
-            if (categoryMember.getLevel() <= allowedSubCatLevel.get()) {
+            if (cmChildLevel <= allowedSubCatLevel.get()) {
                 process(categoryMember);
-            } else {
-                if (cmChildLevel < MAX_LEVEL) {
-                    cmToProcess.add(categoryMember);
-                }
+            } else if (cmChildLevel < MAX_LEVEL) {
+                cmToProcess.add(categoryMember);
             }
         }
 
@@ -46,7 +44,7 @@ public class WikiHandler extends RecursiveAction {
         if (isFilled && (cm.getCountPages().get() > MAX_PAGES || cmChildLevel >= MAX_LEVEL)) {
             cmToProcess.clear();
         } else if (isFilled) {
-            allowedSubCatLevel.incrementAndGet();
+            allowedSubCatLevel.set(cmChildLevel);
             Iterator<CategoryMember> iterator = cmToProcess.iterator();
             while (iterator.hasNext()) {
                 CategoryMember next = iterator.next();

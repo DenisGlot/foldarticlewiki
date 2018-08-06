@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.denisgl.Startup.CmAtrribute.*;
@@ -39,8 +40,6 @@ public class WikiReader {
 
         NodeList categorymembers = doc.getElementsByTagName("cm");
 
-        int countPages = 0;
-        int countSubCat = 0;
         List<CategoryMember> categoryMemberList = new ArrayList<>();
         for (int i = 0; i < categorymembers.getLength() - 1; i++) {
             Node item = categorymembers.item(i);
@@ -63,10 +62,17 @@ public class WikiReader {
             }
             categoryMember.setTitle(titleAttr);
 
+            categoryMemberList.add(categoryMember);
+        }
+
+        Collections.sort(categoryMemberList);
+
+        int countPages = 0;
+        int countSubCat = 0;
+        for (CategoryMember categoryMember : categoryMemberList) {
+            Startup.CmType type = categoryMember.getType();
             String number = String.format("%03d", type == page ? ++countPages : ++countSubCat);
             categoryMember.setNumber(number);
-
-            categoryMemberList.add(categoryMember);
         }
 
         cm.setChildren(categoryMemberList);
